@@ -17,7 +17,7 @@ const upload = multer({ storage: storage });
 const Product = require("../models/products");
 
 router.get("/", (req, res, next) => {
-  Product.find({})
+  Product.find({ category: req.query.category.split('"').join("") })
     .exec()
     .then((docs) => {
       const response = {
@@ -109,6 +109,72 @@ router.post(
   }
 );
 
+router.get("/laptop/", (req, res, next) => {
+  Product.find({ category: "laptop" })
+    .select(
+      "_id color productImage name price ean brand model category cpu cpuDetails gpu gpuDetails ram ramDetails ssd ssdDetails screenSize screenDetails connection weight os finger bluetooth wifi usb sound webCam fastCharge battery dimensions backlit warranty"
+    )
+    .exec()
+    .then((phones) => {
+      res.status(200).json(phones);
+    })
+    .catch((err) => {
+      console.log(err), res.status(500).json({ error: err });
+    });
+});
+
+router.post("/laptop/", upload.any("productImage", 10), (req, res, next) => {
+  const laptop = new Product({
+    _id: new mongoose.Types.ObjectId(),
+    color: req.body.color,
+    productNumber: req.body.productNumber,
+    price: req.body.price,
+    ean: req.body.ean,
+    brand: req.body.brand,
+    model: req.body.model,
+    category: req.body.category,
+    cpu: req.body.cpu,
+    cpuDetails: req.body.cpuDetails,
+    gpu: req.body.gpu,
+    gpuDetails: req.body.gpuDetails,
+    ram: req.body.ram,
+    ramDetails: req.body.ramDetails,
+    ssd: req.body.ssd,
+    ssdDetails: req.body.ssdDetails,
+    screenSize: req.body.screenSize,
+    screenDetails: req.body.screenDetails,
+    connection: req.body.connection,
+    weight: req.body.weight,
+    os: req.body.os,
+    finger: req.body.finger,
+    bluetooth: req.body.bluetooth,
+    wifi: req.body.wifi,
+    usb: req.body.usb,
+    sound: req.body.sound,
+    webCam: req.body.webCam,
+    fastCharge: req.body.fastCharge,
+    battery: req.body.battery,
+    dimensions: req.body.dimensions,
+    backlit: req.body.backlit,
+    warranty: req.body.warranty,
+    // productImage: req.files.map((file) => file.path),
+  });
+  laptop
+    .save()
+    .then((result) => {
+      console.log(result);
+      res.status(201).json({
+        message: "Created laptop successfully!",
+      });
+    })
+    .catch((err) => {
+      console.log(err),
+        res.status(500).json({
+          error: err,
+        });
+    });
+});
+
 router.get("/:productId", (req, res, next) => {
   const id = req.params.productId;
   Product.findById(id)
@@ -128,6 +194,28 @@ router.get("/:productId", (req, res, next) => {
       res.status(500).json({ error: err });
     });
 });
+
+router.patch(
+  "/:productId",
+  upload.any("productImage", 10),
+  (req, res, next) => {
+    const id = req.params.productId;
+    Product.findOneAndUpdate(
+      { _id: id },
+      { productImage: req.files.map((file) => file.path) }
+    )
+      .exec()
+      .then((result) => {
+        console.log(result);
+        res.status(200).json(result);
+      })
+      .catch((err) => {
+        res.status(500).json({
+          error: err,
+        });
+      });
+  }
+);
 
 router.delete("/:productId", (req, res, next) => {
   const id = req.params.productId;
