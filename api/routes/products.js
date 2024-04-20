@@ -17,6 +17,22 @@ const upload = multer({ storage: storage });
 const Product = require("../models/products");
 
 router.get("/", (req, res, next) => {
+  Product.find({})
+    .exec()
+    .then((docs) => {
+      const response = {
+        count: docs.length,
+        products: docs,
+      };
+      res.status(200).json(response);
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json({ error: err });
+    });
+});
+
+router.get("/category", (req, res, next) => {
   Product.find({ category: req.query.category.split('"').join("") })
     .exec()
     .then((docs) => {
@@ -33,13 +49,14 @@ router.get("/", (req, res, next) => {
 });
 
 router.get("/mobilePhones/", (req, res, next) => {
-  Product.find({ category: "Mobile Phone" })
-    .select(
-      "_id color name price ean category screenSize screenRes screenDetails weight build os chipset cpu gpu ram internalMemory mainCameraDetails mainCamera selfieCameraDetails selfieCamera stabilization gps bluetooth nfc wifi infrared usb seansors headphones battery charging wirelessCharging radio simSlot simSlotType ip dimension warranty productImage"
-    )
+  Product.find({ category: "Mobile" })
     .exec()
     .then((phones) => {
-      res.status(200).json(phones);
+      const response = {
+        count: phones.length,
+        products: phones,
+      };
+      res.status(200).json(response);
     })
     .catch((err) => {
       console.log(err), res.status(500).json({ error: err });
@@ -110,13 +127,14 @@ router.post(
 );
 
 router.get("/laptop/", (req, res, next) => {
-  Product.find({ category: "laptop" })
-    .select(
-      "_id color productImage name price ean brand model category cpu cpuDetails gpu gpuDetails ram ramDetails ssd ssdDetails screenSize screenDetails connection weight os finger bluetooth wifi usb sound webCam fastCharge battery dimensions backlit warranty"
-    )
+  Product.find({ category: "Laptop" })
     .exec()
-    .then((phones) => {
-      res.status(200).json(phones);
+    .then((laptops) => {
+      const response = {
+        count: laptops.length,
+        products: laptops,
+      };
+      res.status(200).json(response);
     })
     .catch((err) => {
       console.log(err), res.status(500).json({ error: err });
