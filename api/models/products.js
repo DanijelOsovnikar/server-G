@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const productSchema = mongoose.Schema({
   //LAPTOP//===============================
   _id: mongoose.Schema.Types.ObjectId,
-  productNumber: String,
+  name: String,
   price: Number,
   ean: Number,
   brand: String,
@@ -34,6 +34,9 @@ const productSchema = mongoose.Schema({
   sound: String,
   webCam: String,
   warranty: String,
+  cashDiscount: Boolean,
+  lockedPrice: Boolean,
+  productNumber: String,
   productImage: [String],
 
   //MOBILE PHONE//=========================

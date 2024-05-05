@@ -16,24 +16,43 @@ const upload = multer({ storage: storage });
 
 const Product = require("../models/products");
 
-router.get("/", (req, res, next) => {
-  Product.find({})
-    .exec()
-    .then((docs) => {
-      const response = {
-        count: docs.length,
-        products: docs,
-      };
-      res.status(200).json(response);
-    })
-    .catch((err) => {
-      console.log(err);
-      res.status(500).json({ error: err });
-    });
-});
+//Older version
 
-router.get("/category", (req, res, next) => {
-  Product.find({ category: req.query.category.split('"').join("") })
+// router.get("/", (req, res, next) => {
+//   Product.find({})
+//     .exec()
+//     .then((docs) => {
+//       const response = {
+//         count: docs.length,
+//         products: docs,
+//       };
+//       res.status(200).json(response);
+//     })
+//     .catch((err) => {
+//       console.log(err);
+//       res.status(500).json({ error: err });
+//     });
+// });
+
+//New version
+
+router.get("/", (req, res, next) => {
+  let obj = {};
+  if (req.query.filter === undefined) {
+    obj = {};
+  } else {
+    obj = req.query.filter = JSON.parse(req.query.filter);
+  }
+
+  let filteredObj = {};
+
+  for (let key in obj) {
+    if (obj[key] !== "") {
+      filteredObj[key] = obj[key];
+    }
+  }
+
+  Product.find(filteredObj)
     .exec()
     .then((docs) => {
       const response = {
@@ -49,7 +68,30 @@ router.get("/category", (req, res, next) => {
 });
 
 router.get("/mobilePhones/", (req, res, next) => {
-  Product.find({ category: "Mobile" })
+  let obj = { category: "Mobile" };
+
+  if (req.query.filter === undefined) {
+    obj = { category: "Mobile" };
+  } else {
+    obj = {
+      ...(req.query.filter = JSON.parse(req.query.filter)),
+      category: "Mobile",
+    };
+  }
+  for (let i in obj) {
+    if (obj[i].length === 0) {
+      obj[i] = "";
+    }
+  }
+  let filteredObj = {};
+
+  for (let key in obj) {
+    if (obj[key] !== "") {
+      filteredObj[key] = obj[key];
+    }
+  }
+
+  Product.find(filteredObj)
     .exec()
     .then((phones) => {
       const response = {
@@ -127,7 +169,30 @@ router.post(
 );
 
 router.get("/laptop/", (req, res, next) => {
-  Product.find({ category: "Laptop" })
+  let obj = { category: "Laptop" };
+
+  if (req.query.filter === undefined) {
+    obj = { category: "Laptop" };
+  } else {
+    obj = {
+      ...(req.query.filter = JSON.parse(req.query.filter)),
+      category: "Laptop",
+    };
+  }
+  for (let i in obj) {
+    if (obj[i].length === 0) {
+      obj[i] = "";
+    }
+  }
+  let filteredObj = {};
+
+  for (let key in obj) {
+    if (obj[key] !== "") {
+      filteredObj[key] = obj[key];
+    }
+  }
+
+  Product.find(filteredObj)
     .exec()
     .then((laptops) => {
       const response = {
@@ -145,7 +210,7 @@ router.post("/laptop/", upload.any("productImage", 10), (req, res, next) => {
   const laptop = new Product({
     _id: new mongoose.Types.ObjectId(),
     color: req.body.color,
-    productNumber: req.body.productNumber,
+    name: req.body.name,
     price: req.body.price,
     ean: req.body.ean,
     brand: req.body.brand,
@@ -175,6 +240,9 @@ router.post("/laptop/", upload.any("productImage", 10), (req, res, next) => {
     dimensions: req.body.dimensions,
     backlit: req.body.backlit,
     warranty: req.body.warranty,
+    cashDiscount: req.body.cashDiscount,
+    lockedPrice: req.body.lockedPrice,
+    productNumber: req.body.productNumber,
     // productImage: req.files.map((file) => file.path),
   });
   laptop
