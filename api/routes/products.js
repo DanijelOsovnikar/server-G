@@ -83,15 +83,55 @@ router.get("/mobilePhones/", (req, res, next) => {
       obj[i] = "";
     }
   }
+
   let filteredObj = {};
+  let withOr = [];
+  let withoutOr = [];
 
   for (let key in obj) {
     if (obj[key] !== "") {
-      filteredObj[key] = obj[key];
+      let arr = [];
+
+      if (key === "internalMemory") {
+        obj[key].map((elem) => {
+          let m = { internalMemory: elem };
+          arr.push(m);
+        });
+      } else if (key === "screenRes") {
+        obj[key].map((elem) => {
+          let m = { screenRes: elem };
+          arr.push(m);
+        });
+      } else {
+        filteredObj[key] = obj[key];
+      }
+
+      withOr = arr;
     }
   }
 
-  Product.find(filteredObj)
+  let query = {};
+
+  let objOr = {
+    $or: [...withOr],
+    category: "Mobile",
+    ...filteredObj,
+  };
+
+  let objWOr = {
+    category: "Mobile",
+    ...filteredObj,
+  };
+
+  if (objOr.$or.length === 0) {
+    query = objWOr;
+  } else {
+    query = objOr;
+  }
+
+  console.log(query);
+
+  Product.find(query)
     .exec()
     .then((phones) => {
       const response = {
