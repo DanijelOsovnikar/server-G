@@ -86,7 +86,6 @@ router.get("/mobilePhones/", (req, res, next) => {
 
   let filteredObj = {};
   let withOr = [];
-  let withoutOr = [];
 
   for (let key in obj) {
     if (obj[key] !== "") {
@@ -128,10 +127,23 @@ router.get("/mobilePhones/", (req, res, next) => {
   } else {
     query = objOr;
   }
+  let sort = req.query.sort || "price";
+
+  req.query.sort
+    ? (sort = JSON.parse(req.query.sort).split(","))
+    : (sort = [sort]);
+
+  let sortBy = {};
+  if (sort[1]) {
+    sortBy[sort[0]] = sort[1];
+  } else {
+    sortBy[sort[0]] = "asc";
+  }
 
   console.log(query);
 
   Product.find(query)
+    .sort(sortBy)
     .exec()
     .then((phones) => {
       const response = {
