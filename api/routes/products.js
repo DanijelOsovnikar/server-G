@@ -146,7 +146,27 @@ router.get("/mobilePhones/", (req, res, next) => {
     .sort(sortBy)
     .exec()
     .then((phones) => {
+      let filters = {
+        brand: ["Brend"],
+        model: ["Model"],
+        ram: ["RAM"],
+        internalMemory: ["Interna memorija"],
+        screenSize: ["Veličina ekrana"],
+        usb: ["USB"],
+        battery: ["Kapacitet baterije"],
+        color: ["Boja"],
+      };
+
+      for (let phone of phones) {
+        for (let i in filters) {
+          if (!filters[i].includes(phone[i])) {
+            filters[i].push(phone[i]);
+          }
+        }
+      }
+
       const response = {
+        filter: { ...filters },
         count: phones.length,
         products: phones,
       };
