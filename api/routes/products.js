@@ -94,18 +94,11 @@ router.get("/mobilePhones/", (req, res, next) => {
       if (key === "internalMemory") {
         obj[key].map((elem) => {
           let m = { internalMemory: elem };
-          arr.push(m);
-        });
-      } else if (key === "screenRes") {
-        obj[key].map((elem) => {
-          let m = { screenRes: elem };
-          arr.push(m);
+          withOr.push(m);
         });
       } else {
         filteredObj[key] = obj[key];
       }
-
-      withOr = arr;
     }
   }
 
