@@ -1,5 +1,6 @@
 {
     "env": {
-        "MONGO_ATLAS_PW": "Matrice99"
+        "MONGO_ATLAS_PW": "Matrice99",
+        "KEY": "aslkjdij1238fnqKJSAGLKSJ123503AHST"
     }
 }

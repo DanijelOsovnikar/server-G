@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
 const multer = require("multer");
+const castAggregation = require("mongoose-cast-aggregation");
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -15,6 +16,8 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 const Product = require("../models/products");
+
+mongoose.plugin(castAggregation);
 
 //Older version
 
@@ -35,6 +38,32 @@ const Product = require("../models/products");
 // });
 
 //New version
+
+router.get("/search", async (req, res, next) => {
+  const result = await Product.aggregate([
+    {
+      $search: {
+        index: "search",
+        text: {
+          query: req.query.search,
+          path: "name",
+        },
+      },
+    },
+  ]);
+
+  Product.find()
+    .then(() => {
+      const response = {
+        products: result,
+      };
+      res.status(200).json(response);
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json({ error: err });
+    });
+});
 
 router.get("/", (req, res, next) => {
   let obj = {};
@@ -66,6 +95,20 @@ router.get("/", (req, res, next) => {
       res.status(500).json({ error: err });
     });
 });
+router.get("/mobilePhones/:id", (req, res, next) => {
+  Product.find({ ean: req.params.id })
+    .exec()
+    .then((phones) => {
+      const response = {
+        count: phones.length,
+        products: phones,
+      };
+      res.status(200).json(response);
+    })
+    .catch((err) => {
+      console.log(err), res.status(500).json({ error: err });
+    });
+});
 
 router.get("/mobilePhones/", (req, res, next) => {
   let obj = { category: "Mobile" };
@@ -89,13 +132,12 @@ router.get("/mobilePhones/", (req, res, next) => {
 
   for (let key in obj) {
     if (obj[key] !== "") {
-      let arr = [];
-
       if (key === "internalMemory") {
         obj[key].map((elem) => {
           let m = { internalMemory: elem };
           withOr.push(m);
         });
+      } else if (key === "price") {
       } else {
         filteredObj[key] = obj[key];
       }
@@ -159,7 +201,7 @@ router.get("/mobilePhones/", (req, res, next) => {
       }
 
       const response = {
-        filter: { ...filters },
+        filter: {},
         count: phones.length,
         products: phones,
       };

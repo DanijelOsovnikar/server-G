@@ -3,6 +3,8 @@ const app = express();
 const morgan = require("morgan");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
+const cookieParser = require("cookie-parser");
+const cors = require("cors");
 
 const uri =
   "mongodb+srv://Danijel:" +
@@ -10,6 +12,7 @@ const uri =
   "@clusterg.ikvqsnr.mongodb.net/?retryWrites=true&w=majority&appName=ClusterG";
 const productRoutes = require("./api/routes/products");
 const orderRoutes = require("./api/routes/orders");
+const userRoutes = require("./api/routes/users");
 
 main().catch((err) => console.log(err));
 
@@ -35,13 +38,16 @@ app.use((req, res, next) => {
       "Access-Control-Allow-Methods",
       "PUT, POST, PATCH, DELETE, GET "
     );
+    res.header("Access-Control-Allow-Origin", "*");
     return res.status(200).json({});
   }
   next();
 });
 
+app.use(cookieParser());
 app.use("/products", productRoutes);
 app.use("/orders", orderRoutes);
+app.use("/auth", userRoutes);
 
 app.use((req, res, next) => {
   const error = new Error("Not found");
