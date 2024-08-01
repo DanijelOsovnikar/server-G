@@ -1,15 +1,11 @@
 const mongoose = require("mongoose");
+const Product = require("./products").schema;
 
 const purchaseHistory = mongoose.Schema({
   name: String,
   ean: Number,
   price: Number,
-});
-
-const wishList = mongoose.Schema({
-  name: String,
-  ean: Number,
-  price: Number,
+  productImage: String,
 });
 
 const userSchema = mongoose.Schema({
@@ -23,7 +19,7 @@ const userSchema = mongoose.Schema({
   zip: String || "",
   town: String || "",
   purchaseHistory: [purchaseHistory] || [],
-  wishList: [wishList] || [],
+  wishList: [Product],
 });
 
 module.exports = mongoose.model("User", userSchema);

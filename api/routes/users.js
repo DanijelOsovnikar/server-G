@@ -6,6 +6,7 @@ const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 
 const User = require("../models/users");
+const Product = require("../models/products");
 
 router.post("/signup", async (req, res, next) => {
   const name = req.body.name;
@@ -68,7 +69,7 @@ router.post("/login", async (req, res, next) => {
     .then((user) => {
       res.json({
         status: true,
-        message: "login successfully",
+        message: "Login successfully",
         userFromReq: {
           name: user.name,
           lastName: user.lastName,
@@ -86,6 +87,40 @@ router.post("/login", async (req, res, next) => {
     .catch((err) => {
       console.log(err);
     });
+});
+
+router.post("/update-user", async (req, res, next) => {
+  const user = req.body;
+
+  User.findOneAndUpdate({ email: user.email }, user)
+    .exec()
+    .then(() => {
+      res.json({
+        status: true,
+        message: "Updated info successfully",
+      });
+    })
+    .catch((err) => {
+      console.log(err);
+      res.json({
+        status: false,
+        message: "Error",
+        err: err,
+      });
+    });
+});
+
+router.post("/resetPassword-profilePage", async (req, res, next) => {
+  const email = req.body.email;
+  const password = req.body.password;
+
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await User.findOneAndUpdate({ email: email }, { password: hashedPassword });
+    return res.json({ status: true, message: "Updated password!" });
+  } catch (err) {
+    return res.json({ status: false, message: "Invalid token!" });
+  }
 });
 
 router.post("/forgot-password", async (req, res, next) => {
@@ -141,6 +176,44 @@ router.post("/resetPassword/:token", async (req, res, next) => {
   } catch (err) {
     return res.json({ status: false, message: "Invalid token!" });
   }
+});
+
+router.post("/addToWishlist", async (req, res, next) => {
+  const ean = req.body.ean;
+  const email = req.body.email;
+
+  Product.findOne({ ean: ean })
+    .then(async (product) => {
+      await User.findOneAndUpdate(
+        { email: email },
+        { $push: { wishList: product } }
+      )
+        .then((response) => {
+          res.json({ status: true, message: "Item added" });
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+});
+
+router.get("/getWishlistItems", (req, res, next) => {
+  const email = JSON.parse(req.query.email);
+
+  User.findOne({ email: email })
+    .then((response) => {
+      res.json({ status: true, wishlist: response.wishList });
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+});
+
+router.delete("/removeFromWishlist", async (req, res, next) => {
+  console.log();
 });
 
 module.exports = router;

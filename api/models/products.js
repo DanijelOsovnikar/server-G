@@ -82,6 +82,8 @@ const productSchema = mongoose.Schema({
   dimension: String,
   warranty: String,
   productImage: [String],
+  cashDiscount: Boolean,
+  lockedPrice: Boolean,
 });
 
 module.exports = mongoose.model("Product", productSchema);
