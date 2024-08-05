@@ -84,6 +84,7 @@ const productSchema = mongoose.Schema({
   productImage: [String],
   cashDiscount: Boolean,
   lockedPrice: Boolean,
+  inWishlist: Boolean,
 });
 
 module.exports = mongoose.model("Product", productSchema);

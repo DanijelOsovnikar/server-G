@@ -87,6 +87,7 @@ router.get("/", (req, res, next) => {
       const response = {
         count: docs.length,
         products: docs,
+        category: obj.category,
       };
       res.status(200).json(response);
     })

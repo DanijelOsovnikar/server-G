@@ -184,9 +184,10 @@ router.post("/addToWishlist", async (req, res, next) => {
 
   Product.findOne({ ean: ean })
     .then(async (product) => {
+      let item = await { ...product.toObject(), inWishlist: true };
       await User.findOneAndUpdate(
         { email: email },
-        { $push: { wishList: product } }
+        { $push: { wishList: item } }
       )
         .then((response) => {
           res.json({ status: true, message: "Item added" });
@@ -208,12 +209,30 @@ router.get("/getWishlistItems", (req, res, next) => {
       res.json({ status: true, wishlist: response.wishList });
     })
     .catch((err) => {
-      console.log(err);
+      res.json({ status: false, message: err });
     });
 });
 
-router.delete("/removeFromWishlist", async (req, res, next) => {
-  console.log();
+router.delete("/removeFromWishlist/:ean", async (req, res, next) => {
+  const ean = req.params.ean;
+  const email = JSON.parse(req.query.email);
+
+  User.findOne({ email: email })
+    .then(async (user) => {
+      let list = user.wishList.filter((item) => {
+        return item.ean != ean;
+      });
+      await User.findOneAndUpdate({ email: email }, { wishList: list })
+        .then((result) => {
+          res.json({ status: true, message: "Item deleted from wish list!" });
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 });
 
 module.exports = router;
