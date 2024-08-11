@@ -4,7 +4,6 @@ const morgan = require("morgan");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
-const cors = require("cors");
 
 const uri =
   "mongodb+srv://Danijel:" +

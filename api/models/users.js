@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Product = require("./products").schema;
+const Order = require("./order").schema;
 
 const purchaseHistory = mongoose.Schema({
   name: String,
@@ -18,6 +19,7 @@ const userSchema = mongoose.Schema({
   address: String || "",
   zip: String || "",
   town: String || "",
+  cart: [Order],
   purchaseHistory: [purchaseHistory] || [],
   wishList: [Product],
 });
