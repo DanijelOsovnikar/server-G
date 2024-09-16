@@ -19,24 +19,6 @@ const Product = require("../models/products");
 
 mongoose.plugin(castAggregation);
 
-//Older version
-
-// router.get("/", (req, res, next) => {
-//   Product.find({})
-//     .exec()
-//     .then((docs) => {
-//       const response = {
-//         count: docs.length,
-//         products: docs,
-//       };
-//       res.status(200).json(response);
-//     })
-//     .catch((err) => {
-//       console.log(err);
-//       res.status(500).json({ error: err });
-//     });
-// });
-
 //New version
 
 router.get("/search", async (req, res, next) => {
@@ -96,6 +78,7 @@ router.get("/", (req, res, next) => {
       res.status(500).json({ error: err });
     });
 });
+
 router.get("/mobilePhones/:id", (req, res, next) => {
   Product.find({ ean: req.params.id })
     .exec()

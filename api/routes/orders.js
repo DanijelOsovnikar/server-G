@@ -7,6 +7,7 @@ const Product = require("../models/products");
 const User = require("../models/users");
 
 router.get("/", (req, res, next) => {
+  console.log(req.query);
   const email = JSON.parse(req.query.email);
 
   User.findOne({ email: email })
@@ -38,17 +39,41 @@ router.post("/addToCart", (req, res, next) => {
         quantity: qty,
       };
 
-      // await User.findOne({ email: email })
-      //   .then((respone) => {
+      await User.findOne({ email: email })
+        .then(async (response) => {
+          let filter = response.cart.filter((item) => {
+            return item.ean == ean;
+          });
+          if (filter.length == 0) {
+            await User.findOneAndUpdate(
+              { email: email },
+              { $push: { cart: item } }
+            )
+              .then((response) => {
+                res.json({ status: true, message: "Item added" });
+              })
+              .catch((err) => {
+                console.log(err);
+              });
+          } else {
+            for (let i of response.cart) {
+              if (i.ean === ean) {
+                i.quantity += qty;
+              }
+            }
+            let newCart = response.cart;
 
-      //   })
-      //   .catch((err) => {
-      //     console.log(err);
-      //   });
-
-      await User.findOneAndUpdate({ email: email }, { $push: { cart: item } })
-        .then((response) => {
-          res.json({ status: true, message: "Item added" });
+            await User.findOneAndUpdate(
+              { email: email },
+              { $set: { cart: newCart } }
+            )
+              .then((response) => {
+                res.json({ status: true, message: "Item added", item: item });
+              })
+              .catch((err) => {
+                console.log(err);
+              });
+          }
         })
         .catch((err) => {
           console.log(err);
@@ -62,27 +87,103 @@ router.post("/addToCart", (req, res, next) => {
     });
 });
 
-router.delete("/removeFromCart/:ean", async (req, res, next) => {
-  console.log("first");
+router.post("/addToCart/:ean", async (req, res, next) => {
+  const email = req.body.email;
   const ean = req.params.ean;
+
+  User.findOne({ email: email }).then(async (response) => {
+    for (let item of response.cart) {
+      if (item.ean == ean) {
+        item.quantity += 1;
+      }
+    }
+    await User.findOneAndUpdate(
+      { email: email },
+      { $set: { cart: response.cart } }
+    )
+      .then((result) => {
+        res.json({ status: true, message: "Item added to cart!" });
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  });
+});
+
+router.delete("/removeFromCart/:ean", async (req, res, next) => {
+  const ean = req.params.ean;
+  const removeAll = JSON.parse(req.query.removeAll);
   const email = JSON.parse(req.query.email);
 
-  User.findOne({ email: email })
-    .then(async (user) => {
-      let list = user.cart.filter((item) => {
+  if (removeAll === true) {
+    User.findOne({ email: email }).then(async (response) => {
+      let list = response.cart.filter((item) => {
         return item.ean != ean;
       });
-      await User.findOneAndUpdate({ email: email }, { cart: list })
+
+      await User.findOneAndUpdate({ email: email }, { $set: { cart: list } })
         .then((result) => {
           res.json({ status: true, message: "Item deleted from cart!" });
         })
         .catch((err) => {
           console.log(err);
         });
-    })
-    .catch((err) => {
-      console.log(err);
     });
+  } else {
+    User.findOne({ email: email }).then(async (response) => {
+      for (let item of response.cart) {
+        if (item.ean == ean) {
+          item.quantity -= 1;
+        }
+      }
+      await User.findOneAndUpdate(
+        { email: email },
+        { $set: { cart: response.cart } }
+      )
+        .then((result) => {
+          res.json({ status: true, message: "Item deleted from cart!" });
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    });
+  }
+
+  // User.findOne({ email: email })
+  //   .then(async (response) => {
+  //     for (let item of response.cart) {
+  //       if (item.ean == ean && item.quantity >= 2) {
+  //         await User.findOneAndUpdate(
+  //           { email: email },
+  //           { $set: { "cart.$[t].quantity": item.quantity - 1 } },
+  //           { arrayFilters: [{ "t.ean": ean }] }
+  //         )
+  //           .then((result) => {
+  //             res.json({ status: true, message: "Item deleted from cart!" });
+  //           })
+  //           .catch((err) => {
+  //             console.log(err);
+  //           });
+  //       } else {
+  //         let list = response.cart.filter((item) => {
+  //           return item.ean != ean;
+  //         });
+  //         await User.findOneAndUpdate(
+  //           { email: email },
+  //           { $set: { cart: list } }
+  //         )
+  //           .then((result) => {
+  //             res.json({ status: true, message: "Item deleted from cart!" });
+  //           })
+  //           .catch((err) => {
+  //             console.log(err);
+  //           });
+  //       }
+  //     }
+  //   })
+  //   .catch((err) => {
+  //     console.log(err);
+  //   });
 });
 
 // router.get("/:orderId", (req, res, next) => {

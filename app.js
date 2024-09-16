@@ -9,6 +9,7 @@ const uri =
   "mongodb+srv://Danijel:" +
   process.env.MONGO_ATLAS_PW +
   "@clusterg.ikvqsnr.mongodb.net/?retryWrites=true&w=majority&appName=ClusterG";
+
 const productRoutes = require("./api/routes/products");
 const orderRoutes = require("./api/routes/orders");
 const userRoutes = require("./api/routes/users");
