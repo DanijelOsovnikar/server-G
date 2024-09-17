@@ -7,7 +7,6 @@ const Product = require("../models/products");
 const User = require("../models/users");
 
 router.get("/", (req, res, next) => {
-  console.log(req.query);
   const email = JSON.parse(req.query.email);
 
   User.findOne({ email: email })
@@ -186,6 +185,69 @@ router.delete("/removeFromCart/:ean", async (req, res, next) => {
   //   });
 });
 
+router.post("/addOrder", async (req, res, next) => {
+  const email = req.body.email;
+  const ordered = req.body.orderItems;
+
+  User.findOne({ email: email })
+    .then(async (response) => {
+      let points = Number(response.points) + Number(ordered.points);
+      if (points >= 500) {
+        points = 500;
+      }
+
+      await User.findOneAndUpdate(
+        { email: email },
+        {
+          $push: { purchaseHistory: ordered },
+          $set: { points: points },
+        }
+      )
+        .then((result) => {
+          res.json({ status: true, message: "Success" });
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+});
+
+router.get("/allOrders", (req, res, next) => {
+  const email = JSON.parse(req.query.email);
+
+  User.findOne({ email: email })
+    .then((response) => {
+      res.json({ status: true, purchaseHistory: response.purchaseHistory });
+    })
+    .catch((err) => {
+      res.json({ status: false, message: err });
+    });
+});
+
+router.get("/points", (req, res, next) => {
+  const email = JSON.parse(req.query.email);
+
+  User.findOne({ email: email })
+    .then((response) => {
+      res.json({ status: true, points: response.points });
+    })
+    .catch((err) => {
+      res.json({ status: false, message: err });
+    });
+});
+
+router.delete("/emptyCart", (req, res, next) => {
+  const email = JSON.parse(req.query.email);
+
+  User.findOneAndUpdate({ email: email }, { $set: { cart: [] } })
+    .then(async (response) => {})
+    .catch((err) => {
+      console.log(err);
+    });
+});
 // router.get("/:orderId", (req, res, next) => {
 //   Order.findById(req.params.orderId)
 //     .populate("product")
