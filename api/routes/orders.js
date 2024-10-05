@@ -217,6 +217,7 @@ router.post("/addOrder", async (req, res, next) => {
 
 router.get("/allOrders", (req, res, next) => {
   const email = JSON.parse(req.query.email);
+  console.log(email);
 
   User.findOne({ email: email })
     .then((response) => {

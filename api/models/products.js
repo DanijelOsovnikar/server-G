@@ -1,5 +1,11 @@
 const mongoose = require("mongoose");
 
+const question = mongoose.Schema({
+  name: String,
+  q: String,
+  a: String,
+});
+
 const productSchema = mongoose.Schema({
   // //LAPTOP//===============================
   // _id: mongoose.Schema.Types.ObjectId,
@@ -85,6 +91,7 @@ const productSchema = mongoose.Schema({
   cashDiscount: Boolean,
   lockedPrice: Boolean,
   inWishlist: Boolean,
+  questions: [question],
 });
 
 module.exports = mongoose.model("Product", productSchema);

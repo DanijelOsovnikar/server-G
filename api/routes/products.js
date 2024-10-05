@@ -408,4 +408,32 @@ router.delete("/:productId", (req, res, next) => {
     });
 });
 
+router.post("/question/", (req, res, next) => {
+  const ean = req.body.ean;
+  const question = {
+    name: req.body.name,
+    q: req.body.question,
+  };
+
+  Product.findOneAndUpdate({ ean: ean }, { $push: { questions: question } })
+    .then((result) => {
+      res.json({ status: true, message: "Success" });
+    })
+    .catch((err) => {
+      res.json({ status: false, message: "Fail" });
+      console.log(err);
+    });
+});
+
+router.get("/getQuestions/:ean", (req, res, next) => {
+  const ean = req.params.ean;
+  Product.findOne({ ean: ean })
+    .then((result) => {
+      res.json(result.questions);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+});
+
 module.exports = router;
