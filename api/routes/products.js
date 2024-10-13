@@ -105,6 +105,7 @@ router.get("/mobilePhones/", (req, res, next) => {
       category: "Mobile",
     };
   }
+
   for (let i in obj) {
     if (obj[i].length === 0) {
       obj[i] = "";
@@ -122,6 +123,9 @@ router.get("/mobilePhones/", (req, res, next) => {
           withOr.push(m);
         });
       } else if (key === "price") {
+        let min = obj[key][0];
+        let max = obj[key][1];
+        filteredObj[key] = { $gte: min, $lte: max };
       } else {
         filteredObj[key] = obj[key];
       }
