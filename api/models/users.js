@@ -24,6 +24,8 @@ const CartOrder = mongoose.Schema({
   productImage: String,
   quantity: Number,
   _id: mongoose.Schema.Types.ObjectId,
+  sava: Boolean,
+  savaPrice: Number,
 });
 
 const purchaseHistory = mongoose.Schema({
@@ -34,6 +36,26 @@ const purchaseHistory = mongoose.Schema({
   totalAmount: String,
   date: Date,
   orderNum: Number,
+});
+
+const complaints = mongoose.Schema({
+  name: String,
+  city: String,
+  zip: Number,
+  address: String,
+  phone: Number,
+  email: String,
+  sn: String,
+  typeOfDevice: String,
+  ean: Number,
+  brand: String,
+  model: String,
+  equipment: String,
+  dateOfPurchase: Date,
+  orderNum: Number,
+  description: String,
+  status: String,
+  complaintNum: Number,
 });
 
 const userSchema = mongoose.Schema({
@@ -49,6 +71,7 @@ const userSchema = mongoose.Schema({
   cart: [Order],
   purchaseHistory: [purchaseHistory] || [],
   wishList: [Product],
+  complaints: [complaints] || [],
 });
 
 module.exports = mongoose.model("User", userSchema);

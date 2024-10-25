@@ -200,6 +200,17 @@ router.get("/mobilePhones/", (req, res, next) => {
     });
 });
 
+router.get("/one/:ean", (req, res, next) => {
+  Product.find({ ean: req.params.ean })
+    .exec()
+    .then((product) => {
+      res.status(200).json(product);
+    })
+    .catch((err) => {
+      console.log(err), res.status(500).json({ error: err });
+    });
+});
+
 router.post(
   "/mobilePhones/",
   upload.any("productImage", 10),

@@ -6,6 +6,8 @@ const orderSchema = mongoose.Schema({
   price: Number,
   productImage: String,
   quantity: Number,
+  sava: Boolean,
+  savaPrice: Number,
 });
 
 module.exports = mongoose.model("Order", orderSchema);

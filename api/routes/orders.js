@@ -22,6 +22,8 @@ router.post("/addToCart", (req, res, next) => {
   const ean = req.body.ean;
   const email = req.body.email;
   const qty = req.body.quantity;
+  const sava = req.body.sava;
+  const savaPrice = req.body.savaPrice;
 
   Product.findOne({ ean: ean })
     .then(async (product) => {
@@ -36,6 +38,8 @@ router.post("/addToCart", (req, res, next) => {
         price: product.price,
         productImage: product.productImage[0],
         quantity: qty,
+        sava: sava,
+        savaPrice: savaPrice,
       };
 
       await User.findOne({ email: email })
@@ -107,6 +111,125 @@ router.post("/addToCart/:ean", async (req, res, next) => {
         console.log(err);
       });
   });
+});
+
+router.post("/setSava/:ean", async (req, res, next) => {
+  const email = req.body.email;
+  const price = req.body.price;
+  const ean = req.params.ean;
+
+  User.findOne({ email: email }).then(async (response) => {
+    for (let item of response.cart) {
+      if (item.ean == ean) {
+        item.savaPrice = price;
+      }
+    }
+    await User.findOneAndUpdate(
+      { email: email },
+      { $set: { cart: response.cart } }
+    )
+      .then((result) => {
+        res.json({
+          status: true,
+          message: "Item changed!",
+          cart: response.cart,
+        });
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  });
+});
+
+router.post("/onOffSava/:ean", async (req, res, next) => {
+  const email = req.body.email;
+  const ean = req.params.ean;
+
+  User.findOne({ email: email }).then(async (response) => {
+    for (let item of response.cart) {
+      if (item.ean == ean) {
+        item.sava = !item.sava;
+      }
+    }
+    await User.findOneAndUpdate(
+      { email: email },
+      { $set: { cart: response.cart } }
+    )
+      .then((result) => {
+        res.json({
+          status: true,
+          message: "Item changed!",
+          cart: response.cart,
+        });
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  });
+});
+
+router.get("/getSava", (req, res, next) => {
+  const email = JSON.parse(req.query.email);
+
+  User.findOne({ email: email })
+    .then((response) => {
+      let savaList = [];
+
+      for (let i of response.purchaseHistory) {
+        console.log(i);
+        for (let j in i.cart) {
+          if (i.cart[j].sava) {
+            let first = 0;
+            let second = 0;
+            let qtyOfYears = 0;
+
+            if (i.cart[j].price <= 30000) {
+              first = 1045;
+              second = 1832;
+            } else if (i.cart[j].price > 30000 && i.cart[j].price < 60001) {
+              first = 1378;
+              second = 2461;
+            } else if (i.cart[j].price > 60000 && i.cart[j].price < 90001) {
+              first = 1970;
+              second = 3220;
+            } else if (i.cart[j].price > 90000 && i.cart[j].price < 120001) {
+              first = 2784;
+              second = 4449;
+            } else if (i.cart[j].price > 120000 && i.cart[j].price < 180001) {
+              first = 3416;
+              second = 5502;
+            } else if (i.cart[j].price > 180000 && i.cart[j].price <= 240000) {
+              first = 3854;
+              second = 6331;
+            } else if (i.cart[j].price > 240000 && i.cart[j].price <= 300000) {
+              first = 4398;
+              second = 7200;
+            }
+
+            if (i.cart[j].savaPrice === first) {
+              qtyOfYears = 1;
+            }
+            if (i.cart[j].savaPrice === second) {
+              qtyOfYears = 2;
+            }
+
+            let obj = {
+              itemImg: i.cart[j].productImage,
+              itemName: i.cart[j].name,
+              qtyOfYears: qtyOfYears,
+              itemSavaPrice: i.cart[j].savaPrice,
+              date: i.date,
+            };
+
+            savaList.push(obj);
+          }
+        }
+      }
+      res.json({ status: true, savaList: savaList });
+    })
+    .catch((err) => {
+      res.json({ status: false, message: err });
+    });
 });
 
 router.delete("/removeFromCart/:ean", async (req, res, next) => {

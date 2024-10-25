@@ -31,7 +31,6 @@ router.post("/signup", async (req, res, next) => {
     await newUser
       .save()
       .then((result) => {
-        console.log(result);
         res.status(201).json({
           status: true,
           message: "User registered!",
@@ -136,8 +135,6 @@ router.post("/forgot-password", async (req, res, next) => {
       expiresIn: "5m",
     });
 
-    console.log(token);
-
     var transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -207,6 +204,58 @@ router.get("/getWishlistItems", (req, res, next) => {
   User.findOne({ email: email })
     .then((response) => {
       res.json({ status: true, wishlist: response.wishList });
+    })
+    .catch((err) => {
+      res.json({ status: false, message: err });
+    });
+});
+
+router.get("/getComplaints", (req, res, next) => {
+  const email = JSON.parse(req.query.email);
+
+  User.findOne({ email: email })
+    .then((response) => {
+      res.json({ status: true, complaints: response.complaints });
+    })
+    .catch((err) => {
+      res.json({ status: false, message: err });
+    });
+});
+
+router.post("/addComplaint", async (req, res, next) => {
+  const data = req.body.data;
+  const email = req.body.email;
+
+  let obj = {
+    ...data,
+    status: "Poslat zahtev, čeka se preuzimanje uređaja.",
+    complaintNum: Math.floor(Math.random() * 100000),
+  };
+
+  User.findOneAndUpdate({ email: email }, { $push: { complaints: obj } })
+    .then((response) => {
+      res.json({ status: true, message: "Complaint added" });
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+});
+
+router.get("/getOneComplaint", (req, res, next) => {
+  const email = JSON.parse(req.query.email);
+  const complaintNum = JSON.parse(req.query.complaintNum);
+
+  User.findOne({ email: email })
+    .then((response) => {
+      let complaint = {};
+
+      for (let i of response.complaints) {
+        if (i.complaintNum == complaintNum) {
+          complaint = i;
+        }
+      }
+
+      res.json({ status: true, complaint: complaint });
     })
     .catch((err) => {
       res.json({ status: false, message: err });
