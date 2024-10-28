@@ -93,7 +93,7 @@ router.post("/update-user", async (req, res, next) => {
 
   User.findOneAndUpdate({ email: user.email }, user)
     .exec()
-    .then(() => {
+    .then((response) => {
       res.json({
         status: true,
         message: "Updated info successfully",
@@ -106,6 +106,30 @@ router.post("/update-user", async (req, res, next) => {
         message: "Error",
         err: err,
       });
+    });
+});
+
+router.get("/getUser", (req, res, next) => {
+  const email = JSON.parse(req.query.email);
+
+  User.findOne({ email: email })
+    .then((response) => {
+      let user = {
+        name: response.name,
+        lastName: response.lastName,
+        address: response.address,
+        phoneNumber: response.phoneNumber,
+        email: response.email,
+        points: response.points,
+        town: response.town,
+        zip: response.zip,
+        purchaseHistory: response.purchaseHistory,
+        wishList: response.wishList,
+      };
+      res.json({ status: true, user: user });
+    })
+    .catch((err) => {
+      res.json({ status: false, message: err });
     });
 });
 

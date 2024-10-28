@@ -314,7 +314,14 @@ router.post("/addOrder", async (req, res, next) => {
 
   User.findOne({ email: email })
     .then(async (response) => {
-      let points = Number(response.points) + Number(ordered.points);
+      let points = response.points || 0;
+
+      if (!response.points) {
+        points = Number(ordered.points);
+      } else {
+        points = Number(response.points) + Number(ordered.points);
+      }
+
       if (points >= 500) {
         points = 500;
       }
